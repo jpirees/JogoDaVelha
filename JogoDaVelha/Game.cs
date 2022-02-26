@@ -14,10 +14,15 @@ namespace JogoDaVelha
         public Player Player2 { get; set; }
         public Player Turn { get; set; }
 
+        public int Rounds { get; set; }
+        public int Status { get; set; }
+
         public Game()
         {
             GameView = new string[3, 3];
             Turn = null;
+            Rounds = 0;
+            Status = 0;
         }
 
         public void NewPlayers()
@@ -25,12 +30,12 @@ namespace JogoDaVelha
             Console.Clear();
 
             Console.Write("Enter Player 1 name: ");
-            Player1 = new Player(Console.ReadLine().Trim(' '));
+            Player1 = new Player(Console.ReadLine().ToUpper().Trim(' '));
 
             Console.Clear();
 
             Console.Write("Enter Player 2 name: ");
-            Player2 = new Player(Console.ReadLine().Trim(' '));
+            Player2 = new Player(Console.ReadLine().ToUpper().Trim(' '));
         }
 
         public void Play()
@@ -38,21 +43,37 @@ namespace JogoDaVelha
             Console.Clear();
 
             NewPlayers();
-            Restart();
+            NewGame();
 
-            for (int rounds = 0; rounds < 9; rounds++)
+            while (Rounds < 9)
             {
-                Board();
                 PlayerChoice();
+
+                Rounds++;
+
+                Status = (Rounds >= 5) ? CheckStatus() : 0;
+
+                if (Status == 0)
+                    Turn = (Turn == Player1) ? Player2 : Player1;
+                else
+                    Rounds = 10;
             }
+
+            Console.Clear();
+
+            if (Status == 0)
+                Console.WriteLine($"\nNo winner!");
+            else
+                Console.WriteLine($"\nPlayer ({Turn}) is the winner!");
         }
 
         public void Board()
         {
             Console.Clear();
             Console.WriteLine();
-            Console.WriteLine($"X = {Player1.ToString()}");
-            Console.WriteLine($"O = {Player2.ToString()}");
+            Console.Write($"\tX = {Player1.ToString()}");
+            Console.Write($"\tO = {Player2.ToString()}");
+            Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("\t    0     1     2   ");
             Console.WriteLine("\t       |     |      ");
@@ -68,39 +89,46 @@ namespace JogoDaVelha
 
         public void PlayerChoice()
         {
-            Console.WriteLine();
-            Console.WriteLine($"Which position do you want to play ? ({Turn.ToString()})");
+            bool isEmpty;
+            int choiceRow, choiceColumn;
 
-
-            for (int row = 0; row < GameView.GetLength(0); row++)
+            do
             {
-                for (int column = 0; column < GameView.GetLength(1); column++)
-                    if (GameView[row, column] == "X" || GameView[row, column] == "O")
-                        Console.Write("\t[ ][ ]");
-                    else
-                        Console.Write($"\t[{row}][{column}]");
+                Board();
+
+                Console.WriteLine($"\nWhich position do you want to play ? ({Turn.ToString()})");
+
+                for (int row = 0; row < GameView.GetLength(0); row++)
+                {
+                    for (int column = 0; column < GameView.GetLength(1); column++)
+                        if (GameView[row, column] == "X" || GameView[row, column] == "O")
+                            Console.Write("\t[ ][ ]");
+                        else
+                            Console.Write($"\t[{row}][{column}]");
+
+                    Console.WriteLine();
+                }
 
                 Console.WriteLine();
-            }
 
-            Console.WriteLine();
+                Console.Write("Row: ");
+                choiceRow = int.Parse(Console.ReadLine());
 
+                Console.Write("Column: ");
+                choiceColumn = int.Parse(Console.ReadLine());
 
-            Console.Write("Row: ");
-            int choiceRow = int.Parse(Console.ReadLine());
+                isEmpty = CheckPosition(choiceRow, choiceColumn);
 
-            Console.Write("Column: ");
-            int choiceColumn = int.Parse(Console.ReadLine());
-
+            } while (isEmpty);
 
             GameView[choiceRow, choiceColumn] = (Turn == Player1) ? "X" : "O";
-
-            Turn = (Turn == Player1) ? Player2 : Player1;
         }
 
-        public void Restart()
+        public void NewGame()
         {
             Turn = Player1;
+            Rounds = 0;
+            Status = 3;
 
             GameView[0, 0] = " ";
             GameView[0, 1] = " ";
@@ -115,5 +143,134 @@ namespace JogoDaVelha
             GameView[2, 2] = " ";
         }
 
+        public bool CheckPosition(int row, int column)
+        {
+            if (GameView[row, column] == "X" || GameView[row, column] == "O")
+                return true;
+            else
+                return false;
+        }
+
+        public int CheckStatus()
+        {
+            if (CheckRows() == 1 || CheckColumns() == 1 || CheckDiagonal1() == 1 || CheckDiagonal2() == 1) return 1;
+            if (CheckRows() == 2 || CheckColumns() == 2 || CheckDiagonal1() == 2 || CheckDiagonal2() == 2) return 2;
+
+            return 0;
+        }
+
+        #region Check Rows|Columns|Diagonals
+        public int CheckRows()
+        {
+            int countX = 0;
+            int countO = 0;
+
+            for (int row = 0; row < GameView.GetLength(0); row++)
+            {
+                for (int column = 0; column < GameView.GetLength(1); column++)
+                    if (GameView[row, column] == "X")
+                    {
+                        countO = 0;
+                        countX++;
+                    }
+                    else if (GameView[row, column] == "O")
+                    {
+                        countX = 0;
+                        countO++;
+                    }
+
+                if (countX == 3)
+                    return 1;
+                else if (countO == 3)
+                    return 2;
+
+                countX = 0;
+                countO = 0;
+            }
+
+            return 0;
+        }
+
+        public int CheckColumns()
+        {
+            int countX = 0;
+            int countO = 0;
+
+            for (int column = 0; column < GameView.GetLength(1); column++)
+            {
+                for (int row = 0; row < GameView.GetLength(0); row++)
+                    if (GameView[row, column] == "X")
+                    {
+                        countO = 0;
+                        countX++;
+                    }
+                    else if (GameView[row, column] == "O")
+                    {
+                        countX = 0;
+                        countO++;
+                    }
+
+                if (countX == 3)
+                    return 1;
+                else if (countO == 3)
+                    return 2;
+
+                countX = 0;
+                countO = 0;
+            }
+
+            return 0;
+        }
+
+        public int CheckDiagonal1()
+        {
+            int countX = 0;
+            int countO = 0;
+
+            for (int index = 0; index < GameView.GetLength(0); index++)
+                if (GameView[index, index] == "X")
+                {
+                    countO = 0;
+                    countX++;
+                }
+                else if (GameView[index, index] == "O")
+                {
+                    countX = 0;
+                    countO++;
+                }
+
+            if (countX == 3)
+                return 1;
+            else if (countO == 3)
+                return 2;
+
+            return 0;
+        }
+
+        public int CheckDiagonal2()
+        {
+            int countX = 0;
+            int countO = 0;
+
+            for (int row = 0; row < GameView.GetLength(0); row++)
+                if (GameView[row, GameView.GetLength(1) - 1 - row] == "X")
+                {
+                    countO = 0;
+                    countX++;
+                }
+                else if (GameView[row, GameView.GetLength(1) - 1 - row] == "O")
+                {
+                    countX = 0;
+                    countO++;
+                }
+
+            if (countX == 3)
+                return 1;
+            else if (countO == 3)
+                return 2;
+
+            return 0;
+        }
+        #endregion
     }
 }
