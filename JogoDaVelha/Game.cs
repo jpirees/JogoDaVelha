@@ -128,6 +128,8 @@ namespace JogoDaVelha
 
         public bool CheckPosition(int row, int column)
         {
+            if (row < 0 || row > 2 || column < 0 || column > 2) return true;
+            
             if (GameView[row, column] == "X" || GameView[row, column] == "O")
                 return true;
             else
