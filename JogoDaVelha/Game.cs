@@ -25,18 +25,6 @@ namespace JogoDaVelha
             Status = 0;
         }
 
-        public void NewPlayers()
-        {
-            Console.Clear();
-
-            Console.Write("Enter Player 1 name: ");
-            Player1 = new Player(Console.ReadLine().ToUpper().Trim(' '));
-
-            Console.Clear();
-
-            Console.Write("Enter Player 2 name: ");
-            Player2 = new Player(Console.ReadLine().ToUpper().Trim(' '));
-        }
 
         public void Play()
         {
@@ -55,8 +43,6 @@ namespace JogoDaVelha
 
                 if (Status == 0)
                     Turn = (Turn == Player1) ? Player2 : Player1;
-                else
-                    Rounds = 10;
             }
 
             Console.Clear();
@@ -67,12 +53,47 @@ namespace JogoDaVelha
                 Console.WriteLine($"\nPlayer ({Turn}) is the winner!");
         }
 
+        public void NewPlayers()
+        {
+            Console.Clear();
+
+            Console.Write("Enter Player 1 name: ");
+            Player1 = new Player(Console.ReadLine().ToUpper().Trim(' '));
+
+            Console.Clear();
+
+            Console.Write("Enter Player 2 name: ");
+            Player2 = new Player(Console.ReadLine().ToUpper().Trim(' '));
+        }
+
+        public void PlayerChoice()
+        {
+            int choiceRow, choiceColumn;
+
+            do
+            {
+                Board();
+
+                BoardStatus();
+
+                Console.Write("Row: ");
+                choiceRow = int.Parse(Console.ReadLine());
+
+                Console.Write("Column: ");
+                choiceColumn = int.Parse(Console.ReadLine());
+
+            } while (CheckPosition(choiceRow, choiceColumn));
+
+            GameView[choiceRow, choiceColumn] = (Turn == Player1) ? "X" : "O";
+        }
+
         public void Board()
         {
             Console.Clear();
             Console.WriteLine();
             Console.Write($"\tX = {Player1.ToString()}");
             Console.Write($"\tO = {Player2.ToString()}");
+            Console.Write($"\tRound = {Rounds + 1}");
             Console.WriteLine();
             Console.WriteLine();
             Console.WriteLine("\t    0     1     2   ");
@@ -87,60 +108,22 @@ namespace JogoDaVelha
             Console.WriteLine("\t       |     |      ");
         }
 
-        public void PlayerChoice()
+        public void BoardStatus()
         {
-            bool isEmpty;
-            int choiceRow, choiceColumn;
+            Console.WriteLine($"\nWhich position do you want to play ? ({Turn.ToString()})");
 
-            do
+            for (int row = 0; row < GameView.GetLength(0); row++)
             {
-                Board();
-
-                Console.WriteLine($"\nWhich position do you want to play ? ({Turn.ToString()})");
-
-                for (int row = 0; row < GameView.GetLength(0); row++)
-                {
-                    for (int column = 0; column < GameView.GetLength(1); column++)
-                        if (GameView[row, column] == "X" || GameView[row, column] == "O")
-                            Console.Write("\t[ ][ ]");
-                        else
-                            Console.Write($"\t[{row}][{column}]");
-
-                    Console.WriteLine();
-                }
+                for (int column = 0; column < GameView.GetLength(1); column++)
+                    if (GameView[row, column] == "X" || GameView[row, column] == "O")
+                        Console.Write("\t[ ][ ]");
+                    else
+                        Console.Write($"\t[{row}][{column}]");
 
                 Console.WriteLine();
+            }
 
-                Console.Write("Row: ");
-                choiceRow = int.Parse(Console.ReadLine());
-
-                Console.Write("Column: ");
-                choiceColumn = int.Parse(Console.ReadLine());
-
-                isEmpty = CheckPosition(choiceRow, choiceColumn);
-
-            } while (isEmpty);
-
-            GameView[choiceRow, choiceColumn] = (Turn == Player1) ? "X" : "O";
-        }
-
-        public void NewGame()
-        {
-            Turn = Player1;
-            Rounds = 0;
-            Status = 3;
-
-            GameView[0, 0] = " ";
-            GameView[0, 1] = " ";
-            GameView[0, 2] = " ";
-
-            GameView[1, 0] = " ";
-            GameView[1, 1] = " ";
-            GameView[1, 2] = " ";
-
-            GameView[2, 0] = " ";
-            GameView[2, 1] = " ";
-            GameView[2, 2] = " ";
+            Console.WriteLine();
         }
 
         public bool CheckPosition(int row, int column)
@@ -160,6 +143,7 @@ namespace JogoDaVelha
         }
 
         #region Check Rows|Columns|Diagonals
+
         public int CheckRows()
         {
             int countX = 0;
@@ -271,6 +255,27 @@ namespace JogoDaVelha
 
             return 0;
         }
+
         #endregion
+
+        public void NewGame()
+        {
+            Turn = Player1;
+            Rounds = 0;
+            Status = 3;
+
+            GameView[0, 0] = " ";
+            GameView[0, 1] = " ";
+            GameView[0, 2] = " ";
+
+            GameView[1, 0] = " ";
+            GameView[1, 1] = " ";
+            GameView[1, 2] = " ";
+
+            GameView[2, 0] = " ";
+            GameView[2, 1] = " ";
+            GameView[2, 2] = " ";
+        }
+
     }
 }
