@@ -6,7 +6,7 @@ namespace JogoDaVelha
     {
         static void Main(string[] args)
         {
-            Game game = new Game();
+            Game game;
 
             string action;
 
@@ -19,6 +19,7 @@ namespace JogoDaVelha
                     case "0": break;
 
                     case "1":
+                        game = new Game();
                         game.Play();
                         break;
 
